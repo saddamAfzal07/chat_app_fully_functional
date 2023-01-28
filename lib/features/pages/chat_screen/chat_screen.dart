@@ -14,6 +14,8 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../users_profile_info/users_profile_info.dart';
+
 class ChatScreen extends StatefulWidget {
   final ChatUser user;
   const ChatScreen({super.key, required this.user});
@@ -27,6 +29,8 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Message> userChatList = [];
   //for emoji
   bool showEmoji = false;
+  //for check if image is uploaded or not
+  bool _isUploading = false;
 
   final _textController = TextEditingController();
   @override
@@ -79,10 +83,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                 .map((e) => Message.fromJson(e.data()))
                                 .toList();
 
-                            print(userChatList);
+                            // print(userChatList);
 
                             if (userChatList.isNotEmpty) {
                               return ListView.builder(
+                                reverse: true,
                                 itemCount: userChatList.length,
                                 itemBuilder: (context, index) {
                                   return MessageCard(
@@ -103,6 +108,18 @@ class _ChatScreenState extends State<ChatScreen> {
                       },
                     ),
                   ),
+                  if (_isUploading)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 40,
+                      ),
+                      child: Align(
+                          alignment: Alignment.centerRight,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1,
+                          )),
+                    ),
                   _textField(),
                   if (showEmoji)
                     SizedBox(
@@ -174,12 +191,18 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: () async {
                       final ImagePicker picker = ImagePicker();
                       // Pick an image
-                      final XFile? image = await picker.pickImage(
-                          source: ImageSource.gallery, imageQuality: 80);
-                      if (image != null) {
-                        print(image.path);
+                      final List<XFile> imagesList =
+                          await picker.pickMultiImage(imageQuality: 80);
+                      //pick multiple images
 
-                        Apis.sendChatImage(widget.user, File(image.path));
+                      for (var i in imagesList) {
+                        setState(() {
+                          _isUploading = true;
+                        });
+                        Apis.sendChatImage(widget.user, File(i.path));
+                        setState(() {
+                          _isUploading = false;
+                        });
                       }
                     },
                     icon: Icon(
@@ -196,8 +219,14 @@ class _ChatScreenState extends State<ChatScreen> {
                           source: ImageSource.camera, imageQuality: 80);
                       if (image != null) {
                         print(image.path);
+                        setState(() {
+                          _isUploading = true;
+                        });
 
                         Apis.sendChatImage(widget.user, File(image.path));
+                        setState(() {
+                          _isUploading = false;
+                        });
                       }
                     },
                     icon: Icon(
@@ -240,6 +269,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _appbar() {
     return ListTile(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => UsersProfileScreen(
+              user: widget.user,
+            ),
+          ),
+        );
+      },
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: CachedNetworkImage(

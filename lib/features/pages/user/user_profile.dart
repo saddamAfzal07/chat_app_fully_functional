@@ -5,6 +5,7 @@ import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/features/pages/auth/login_screen.dart';
 import 'package:chat_app/models/models.dart';
 import 'package:chat_app/utils/dialoges.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
@@ -37,10 +38,12 @@ class _UserProfileState extends State<UserProfile> {
           ),
           onPressed: () async {
             print("Logout");
+            await Apis.updateActiveStatus(false);
             Apis.ProgressIndicator(context);
             await Apis.auth.signOut();
             await GoogleSignIn().signOut();
             Navigator.pop(context);
+
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
@@ -48,6 +51,7 @@ class _UserProfileState extends State<UserProfile> {
               ),
               (route) => false,
             );
+            Apis.auth = FirebaseAuth.instance;
           },
         ),
         appBar: AppBar(
@@ -80,8 +84,8 @@ class _UserProfileState extends State<UserProfile> {
                               borderRadius:
                                   BorderRadius.circular(size.height * .25),
                               child: CachedNetworkImage(
-                                height: size.height * .22,
-                                width: size.width * .35,
+                                height: 150,
+                                width: 150,
                                 fit: BoxFit.fill,
                                 imageUrl: widget.user.image == ""
                                     ? "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png"
@@ -245,9 +249,11 @@ class _UserProfileState extends State<UserProfile> {
                   children: [
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                          fixedSize: Size(200, 100),
-                          shape: CircleBorder(),
-                          backgroundColor: Colors.white),
+                        fixedSize: Size(200, 100),
+                        shape: CircleBorder(),
+
+                        // backgroundColor: Colors.white
+                      ),
                       onPressed: () async {
                         final ImagePicker picker = ImagePicker();
                         // Pick an image
@@ -272,7 +278,8 @@ class _UserProfileState extends State<UserProfile> {
                       style: ElevatedButton.styleFrom(
                         fixedSize: Size(200, 100),
                         shape: CircleBorder(),
-                        backgroundColor: Colors.white,
+
+                        // backgroundColor: Colors.white,
                       ),
                       onPressed: () async {
                         final ImagePicker picker = ImagePicker();

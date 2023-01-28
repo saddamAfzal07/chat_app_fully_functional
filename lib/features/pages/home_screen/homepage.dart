@@ -1,16 +1,16 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/features/pages/auth/login_screen.dart';
-import 'package:chat_app/features/pages/splash_screen/splash_screen.dart';
-import 'package:chat_app/features/user/user_profile.dart';
+import 'package:chat_app/features/pages/user/user_profile.dart';
 import 'package:chat_app/models/models.dart';
 import 'package:chat_app/widgets/chat_user_card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
-import '../../../chat_screen/chat_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -27,6 +27,23 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     Apis.currentUserInfo();
+    //for updating user active status according to lifecycle events
+    //resume -- active or online
+    //pause  -- inactive or offline
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      log('Message: $message');
+
+      if (Apis.auth.currentUser != null) {
+        if (message.toString().contains('resume')) {
+          Apis.updateActiveStatus(true);
+        }
+        if (message.toString().contains('pause')) {
+          Apis.updateActiveStatus(false);
+        }
+      }
+
+      return Future.value(message);
+    });
   }
 
   @override
@@ -133,7 +150,7 @@ class _HomePageState extends State<HomePage> {
           body: Column(
             children: [
               Expanded(
-                child: StreamBuilder(
+                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: Apis.getAllUsers(),
                   builder: (context, snapshot) {
                     switch (snapshot.connectionState) {

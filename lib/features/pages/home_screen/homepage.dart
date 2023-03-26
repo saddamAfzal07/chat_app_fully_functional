@@ -69,16 +69,17 @@ class _HomePageState extends State<HomePage> {
             onPressed: () async {},
             child: IconButton(
               onPressed: () async {
-                print("Logout");
-                await Apis.auth.signOut();
-                // await GoogleSignIn().signOut();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => LoginScreen(),
-                  ),
-                  (route) => false,
-                );
+                _addUserDialog();
+                // print("Logout");
+                // await Apis.auth.signOut();
+                // // await GoogleSignIn().signOut();
+                // Navigator.pushAndRemoveUntil(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (BuildContext context) => LoginScreen(),
+                //   ),
+                //   (route) => false,
+                // );
               },
               icon: Icon(
                 Icons.add_comment,
@@ -189,6 +190,73 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  //dialog for Add user
+  void _addUserDialog() {
+    String email = '';
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        contentPadding:
+            const EdgeInsets.only(left: 24, right: 24, top: 20, bottom: 10),
+
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+
+        //title
+        title: Row(
+          children: const [
+            Icon(
+              Icons.person_add,
+              color: Colors.blue,
+              size: 28,
+            ),
+            Text('  Add USER')
+          ],
+        ),
+
+        //content
+        content: TextFormField(
+          maxLines: null,
+          onChanged: (value) => email = value,
+          decoration: InputDecoration(
+              hintText: "Email Id",
+              prefixIcon: Icon(
+                Icons.email,
+                color: Colors.blue,
+              ),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(15))),
+        ),
+
+        //actions
+        actions: [
+          //cancel button
+          MaterialButton(
+              onPressed: () {
+                //hide alert dialog
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.blue, fontSize: 16),
+              )),
+
+          //update button
+          MaterialButton(
+              onPressed: () {
+                //hide alert dialog
+                // Navigator.pop(context);
+                // APIs.updateMessage(widget.message, updatedMsg);
+              },
+              child: const Text(
+                'Add',
+                style: TextStyle(color: Colors.blue, fontSize: 16),
+              ))
+        ],
       ),
     );
   }

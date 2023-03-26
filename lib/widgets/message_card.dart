@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/models/message.dart';
@@ -5,6 +7,7 @@ import 'package:chat_app/utils/date_time.dart';
 import 'package:chat_app/utils/dialoges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 
 class MessageCard extends StatefulWidget {
   final Message msg;
@@ -270,21 +273,24 @@ class _MessageCardState extends State<MessageCard> {
                           color: Colors.blue, size: 26),
                       name: 'Save Image',
                       onTap: () async {
-                        // try {
-                        //   log('Image Url: ${widget.message.msg}');
-                        //   await GallerySaver.saveImage(widget.message.msg,
-                        //           albumName: 'We Chat')
-                        //       .then((success) {
-                        //     //for hiding bottom sheet
-                        //     Navigator.pop(context);
-                        //     if (success != null && success) {
-                        //       Dialogs.showSnackbar(
-                        //           context, 'Image Successfully Saved!');
-                        //     }
-                        //   });
-                        // } catch (e) {
-                        //   log('ErrorWhileSavingImg: $e');
-                        // }
+                        try {
+                          print("enter into try");
+                          log('Image Url: ${widget.msg.msg}');
+                          await GallerySaver.saveImage(widget.msg.msg!,
+                                  albumName: 'Chit Chat')
+                              .then((success) {
+                            //for hiding bottom sheet
+                            Navigator.pop(context);
+                            if (success != null && success) {
+                              Dialogues.successDialogue(
+                                  context, 'Image Successfully Saved!');
+                            }
+                          });
+                        } catch (e) {
+                          print("enter into catch");
+
+                          log('ErrorWhileSavingImg: $e');
+                        }
                       }),
 
               //separator or divider
@@ -323,8 +329,6 @@ class _MessageCardState extends State<MessageCard> {
               //separator or divider
               Divider(
                 color: Colors.black54,
-                endIndent: mq.width * .04,
-                indent: mq.width * .04,
               ),
 
               //sent time
@@ -433,11 +437,12 @@ class _OptionItem extends StatelessWidget {
           child: Row(children: [
             icon,
             Flexible(
-                child: Text('    $name',
-                    style: const TextStyle(
-                        fontSize: 15,
-                        color: Colors.black54,
-                        letterSpacing: 0.5)))
+              child: Text(
+                '    $name',
+                style: const TextStyle(
+                    fontSize: 15, color: Colors.black54, letterSpacing: 0.5),
+              ),
+            )
           ]),
         ));
   }

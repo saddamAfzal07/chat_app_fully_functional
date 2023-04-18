@@ -1,3 +1,4 @@
+import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/features/pages/auth/login_screen.dart';
 import 'package:chat_app/utils/dialoges.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,43 +37,32 @@ class _SignUPScreenState extends State<SignUPScreen> {
       isLoading = true;
     });
     try {
-      // FirebaseAuth auth = FirebaseAuth.instance;
-      User? user = FirebaseAuth.instance.currentUser;
+      FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: email.text, password: password.text)
+          .then((value) {
+        print(
+            "signp user id ===>>>>>${FirebaseAuth.instance.currentUser!.uid}");
 
-      FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email.text, password: password.text);
-      setState(() {
-        isLoading = false;
+        setState(() {
+          isLoading = false;
+        });
+
+        Apis.createNewUser(
+          id: FirebaseAuth.instance.currentUser!.uid,
+          email: email.text,
+          name: username.text,
+        ).then((value) {
+          Dialogues.successDialogue(context, "Email Registered Successfully");
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (BuildContext context) => LoginScreen(),
+            ),
+            (route) => false,
+          );
+        });
       });
-      Dialogues.successDialogue(context, "Email Registered Successfully");
-
-      // .then((signedInUser) => FirebaseFirestore.instance
-      //         .collection("Userlist")
-      //         .doc(signedInUser.user?.uid)
-      //         .set({
-      //       'user_Id': user?.uid,
-      //       'user_name': username.text,
-      //       'joinDate': DateTime.now().millisecondsSinceEpoch,
-      //       'email': email.text,
-      //       'phoneno': phone.text,
-      //     })
-      //     .then((signedInUser) => {
-      // setState(() {
-      //   isloading = false;
-      // }),
-      //               print("Successfull"),
-      //               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      //                 content: Text("Successfully Signup"),
-      //                 backgroundColor: Colors.green,
-      //                 behavior: SnackBarBehavior.floating,
-      //               )),
-      //               Navigator.pushReplacement(
-      //                   context,
-      //                   MaterialPageRoute(
-      //                       builder: (context) => LoginScreen()))
-      //             }
-      // )
-      // );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         setState(() {

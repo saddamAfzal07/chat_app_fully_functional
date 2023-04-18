@@ -41,27 +41,33 @@ class _LoginScreenState extends State<LoginScreen> {
         password: pass1,
       )
           .then((user) async {
-        if (user != null) {
-          if (await (Apis.userExists())) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => HomePage(),
-              ),
-              (route) => false,
-            );
-          } else {
-            await Apis.createNewUser().then((value) {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => HomePage(),
-                ),
-                (route) => false,
-              );
-            });
-          }
-        }
+        print("Login id ===>>>>>${FirebaseAuth.instance.currentUser!.uid}");
+
+        MaterialPageRoute(
+          builder: (BuildContext context) => HomePage(),
+        );
+
+        // if (user != null) {
+        //   if (await (Apis.userExists())) {
+        //     Navigator.pushAndRemoveUntil(
+        //       context,
+        //       MaterialPageRoute(
+        //         builder: (BuildContext context) => HomePage(),
+        //       ),
+        //       (route) => false,
+        //     );
+        //   } else {
+        // await Apis.createNewUser().then((value) {
+        //   Navigator.pushAndRemoveUntil(
+        //     context,
+        // MaterialPageRoute(
+        //   builder: (BuildContext context) => HomePage(),
+        // ),
+        //     (route) => false,
+        //   );
+        // });
+        //   }
+        // }
       });
 
       Navigator.pushAndRemoveUntil(
@@ -147,9 +153,9 @@ class _LoginScreenState extends State<LoginScreen> {
     signInWithGoogle().then((user) {
       EasyLoading.showSuccess('Login successful');
       EasyLoading.dismiss();
-      print("success");
+
       log(user.user.toString());
-      print("user==>" + user.user.toString());
+
       print(user.credential!.token);
       print(user.credential!.token);
       print(user.additionalUserInfo);

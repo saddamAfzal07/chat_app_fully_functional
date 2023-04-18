@@ -45,18 +45,15 @@ class _ChatUserCardState extends State<ChatUserCard> {
           stream: Apis.getLastMsg(widget.user),
           builder: (context, snapshot) {
             final data = snapshot.data?.docs;
-            print("snapshot==>>${snapshot.data?.docs}");
-            print("data==>>${data}");
+
             final list =
                 data?.map((e) => Message.fromJson(e.data())).toList() ?? [];
 
-            print("List ==>${list}");
             if (list.isNotEmpty) {
               print("Enter in to not list null");
               _message = list[0];
             }
             ;
-            print("message==>>${_message}");
 
             return ListTile(
               leading: ClipRRect(

@@ -17,28 +17,38 @@ class _SplashScreenState extends State<SplashScreen> {
     setState(() {});
     // TODO: implement initState
     super.initState();
-    if (FirebaseAuth.instance.currentUser != null) {
-      print("user true");
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => HomePage(),
-            ),
-            (Route<dynamic> route) => false);
-      });
-    } else {
-      print("user false");
-      Future.delayed(Duration(seconds: 2), () {
-        setState(() {});
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => LoginScreen(),
-            ),
-          );
-        });
-      });
-    }
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {});
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(),
+        ),
+      );
+    });
+
+    // if (FirebaseAuth.instance.currentUser != null) {
+    //   print("user true");
+    //   SchedulerBinding.instance.addPostFrameCallback((_) {
+    //     Navigator.of(context).pushAndRemoveUntil(
+    //         MaterialPageRoute(
+    //           builder: (context) => HomePage(),
+    //         ),
+    //         (Route<dynamic> route) => false);
+    //   });
+    // } else {
+    //   print("user false");
+    //   Future.delayed(Duration(seconds: 2), () {
+    //     setState(() {});
+    //     SchedulerBinding.instance.addPostFrameCallback((_) {
+    //       Navigator.of(context).pushReplacement(
+    //         MaterialPageRoute(
+    //           builder: (context) => LoginScreen(),
+    //         ),
+    //       );
+    //     });
+    //   });
+    // }
   }
 
   @override

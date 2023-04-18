@@ -58,16 +58,20 @@ class Apis {
   }
 
   //for create new user
-  static Future<void> createNewUser() async {
+  static Future<void> createNewUser({
+    required String id,
+    required String name,
+    required String email,
+  }) async {
     final time = DateTime.now().microsecondsSinceEpoch.toString();
     final chatUser = ChatUser(
-        id: user.uid,
-        about: "hello ",
-        email: user.email,
-        name: user.displayName ?? "Haris Rauf",
+        id: id,
+        about: "Let,s Start Chit Chat",
+        email: email,
+        name: name,
         createdAt: time,
         image: user.photoURL ??
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTegQdwQ7gAPaO0avqMOsUv7Ucqjrt5U9P1Vsac_rE&s",
+            "https://cdn-icons-png.flaticon.com/512/149/149071.png",
         isOnline: false,
         lastActive: time,
         pushToken: "");
@@ -89,10 +93,11 @@ class Apis {
   }
 
   static late ChatUser me;
-  //Getting current user info
+  // Getting current user info
   static Future<void> currentUserInfo() async {
     await firestore.collection("users").doc(user.uid).get().then((value) async {
       if (value.exists) {
+        print("Get current user data=>>>>>>");
         me = ChatUser.fromJson(value.data()!);
         //call token
         getFirebaseMessagingToken();
@@ -100,7 +105,12 @@ class Apis {
         updateActiveStatus(true);
         log('My Data: ${value.data()}');
       } else {
-        await createNewUser().then((value) => currentUserInfo());
+        await createNewUser(
+                email: me.email.toString(),
+                name: me.name.toString(),
+                id: user.uid)
+            .then((value) => currentUserInfo());
+        print("not get current user data=>>>>>>");
       }
     });
   }

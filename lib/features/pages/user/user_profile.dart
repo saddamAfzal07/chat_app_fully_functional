@@ -37,12 +37,16 @@ class _UserProfileState extends State<UserProfile> {
             Icons.logout,
           ),
           onPressed: () async {
+            // Apis.auth =
+
+            // FirebaseAuth.instance.signOut();
             print("Logout");
             await Apis.updateActiveStatus(false);
             Apis.ProgressIndicator(context);
-            await Apis.auth.signOut();
-            await GoogleSignIn().signOut();
-            Navigator.pop(context);
+            FirebaseAuth.instance.signOut();
+            // await Apis.auth.signOut();
+            // await GoogleSignIn().signOut();
+            // Navigator.pop(context);
 
             Navigator.pushAndRemoveUntil(
               context,
@@ -51,7 +55,6 @@ class _UserProfileState extends State<UserProfile> {
               ),
               (route) => false,
             );
-            Apis.auth = FirebaseAuth.instance;
           },
         ),
         appBar: AppBar(

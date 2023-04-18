@@ -49,16 +49,16 @@ class _MessageCardState extends State<MessageCard> {
             SizedBox(
               width: 4,
             ),
-            Text(
-              MyDateUtil.getFormattedTime(
-                context: context,
-                time: widget.msg.sent.toString(),
-              ),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
-              ),
-            ),
+            // Text(
+            //   MyDateUtil.getFormattedTime(
+            //     context: context,
+            //     time: widget.msg.sent.toString(),
+            //   ),
+            //   style: TextStyle(
+            //     fontSize: 12,
+            //     color: Colors.black87,
+            //   ),
+            // ),
           ],
         ),
         Flexible(
@@ -211,16 +211,16 @@ class _MessageCardState extends State<MessageCard> {
             SizedBox(
               width: 4,
             ),
-            Text(
-              MyDateUtil.getFormattedTime(
-                context: context,
-                time: widget.msg.read.toString(),
-              ),
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
-              ),
-            ),
+            // Text(
+            //   MyDateUtil.getFormattedTime(
+            //     context: context,
+            //     time: widget.msg.read.toString(),
+            //   ),
+            //   style: TextStyle(
+            //     fontSize: 12,
+            //     color: Colors.black87,
+            //   ),
+            // ),
           ],
         ),
       ],

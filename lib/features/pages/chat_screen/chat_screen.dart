@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app/api/apis.dart';
 import 'package:chat_app/models/message.dart';
 import 'package:chat_app/models/models.dart';
+import 'package:chat_app/utils/date_time.dart';
 import 'package:chat_app/widgets/message_card.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -50,6 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Scaffold(
             backgroundColor: Color.fromARGB(255, 179, 212, 240),
             appBar: AppBar(
+              backgroundColor: Colors.blue.shade100,
               toolbarHeight: 65,
               elevation: 2,
               automaticallyImplyLeading: false,
@@ -252,8 +254,14 @@ class _ChatScreenState extends State<ChatScreen> {
           shape: CircleBorder(),
           onPressed: () {
             if (_textController.text.isNotEmpty) {
-              Apis.sendMessage(widget.user, _textController.text, Type.text);
-              _textController.clear();
+              if (userChatList.isEmpty) {
+                Apis.sendFirstMessage(
+                    widget.user, _textController.text, Type.text);
+                _textController.clear();
+              } else {
+                Apis.sendMessage(widget.user, _textController.text, Type.text);
+                _textController.clear();
+              }
             }
           },
           child: Icon(
@@ -266,43 +274,62 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _appbar() {
-    return ListTile(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => UsersProfileScreen(
-              user: widget.user,
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: Apis.getUserInfo(widget.user),
+        builder: (context, snapshot) {
+          final data = snapshot.data?.docs;
+
+          final list =
+              data?.map((e) => ChatUser.fromJson(e.data())).toList() ?? [];
+
+          return ListTile(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UsersProfileScreen(
+                    user: widget.user,
+                  ),
+                ),
+              );
+            },
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: CachedNetworkImage(
+                height: 50,
+                width: 50,
+                imageUrl: widget.user.image == ""
+                    ? "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png"
+                    : widget.user.image.toString(),
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ),
             ),
-          ),
-        );
-      },
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: CachedNetworkImage(
-          height: 50,
-          width: 50,
-          imageUrl: widget.user.image == ""
-              ? "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png"
-              : widget.user.image.toString(),
-          placeholder: (context, url) => CircularProgressIndicator(),
-          errorWidget: (context, url, error) => Icon(Icons.error),
-        ),
-      ),
-      title: Text(
-        widget.user.name.toString(),
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Text(
-        "not available",
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-    );
+            title: Text(
+              widget.user.name.toString(),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(
+              list.isNotEmpty
+                  ? list[0].isOnline!
+                      ? "Online"
+                      : MyDateUtil.getLastActiveTime(
+                          context: context,
+                          lastActive: list[0].lastActive.toString(),
+                        )
+                  : MyDateUtil.getLastActiveTime(
+                      context: context,
+                      lastActive: widget.user.lastActive.toString(),
+                    ),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          );
+        });
   }
 }

@@ -48,6 +48,7 @@ dependencies:
   http: ^0.13.5
   flutter_notification_channel: ^2.0.0
   gallery_saver: ^2.3.2
+  intl:
 
 
 dev_dependencies:

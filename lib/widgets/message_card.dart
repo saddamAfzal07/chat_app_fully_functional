@@ -8,6 +8,7 @@ import 'package:chat_app/utils/dialoges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gallery_saver/gallery_saver.dart';
+import 'package:intl/intl.dart';
 
 class MessageCard extends StatefulWidget {
   final Message msg;
@@ -49,16 +50,16 @@ class _MessageCardState extends State<MessageCard> {
             SizedBox(
               width: 4,
             ),
-            // Text(
-            //   MyDateUtil.getFormattedTime(
-            //     context: context,
-            //     time: widget.msg.sent.toString(),
-            //   ),
-            //   style: TextStyle(
-            //     fontSize: 12,
-            //     color: Colors.black87,
-            //   ),
-            // ),
+            Text(
+              MyDateUtil.getFormattedTime(
+                context: context,
+                time: widget.msg.sent.toString(),
+              ),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+              ),
+            ),
           ],
         ),
         Flexible(
@@ -211,16 +212,18 @@ class _MessageCardState extends State<MessageCard> {
             SizedBox(
               width: 4,
             ),
-            // Text(
-            //   MyDateUtil.getFormattedTime(
-            //     context: context,
-            //     time: widget.msg.read.toString(),
-            //   ),
-            //   style: TextStyle(
-            //     fontSize: 12,
-            //     color: Colors.black87,
-            //   ),
-            // ),
+            Text(
+              MyDateUtil.getFormattedTime(
+                context: context,
+                time: widget.msg.read.toString(),
+              ),
+
+              // widget.msg.read.toString(),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black87,
+              ),
+            ),
           ],
         ),
       ],

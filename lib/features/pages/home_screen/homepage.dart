@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../utils/dialoges.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -69,7 +71,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () async {},
             child: IconButton(
               onPressed: () async {
-                _addUserDialog();
+                _addChatUserDialog();
                 // print("Logout");
                 // await Apis.auth.signOut();
                 // // await GoogleSignIn().signOut();
@@ -151,42 +153,62 @@ class _HomePageState extends State<HomePage> {
           body: Column(
             children: [
               Expanded(
-                child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: Apis.getAllUsers(),
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      //if data is loading
-                      case ConnectionState.waiting:
-                      case ConnectionState.none:
-                        return Center(child: CircularProgressIndicator());
-                      //if some and all data loaded
-                      case ConnectionState.active:
-                      case ConnectionState.done:
-                        final data = snapshot.data!.docs;
-                        usersList = data
-                            .map((e) => ChatUser.fromJson(e.data()))
-                            .toList();
+                  child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      //get id of only known users
+                      stream: Apis.getMyUsers(),
+                      builder: (context, snapshot) {
+                        switch (snapshot.connectionState) {
 
-                        if (usersList.isNotEmpty) {
-                          return ListView.builder(
-                            itemCount: search
-                                ? searchingList.length
-                                : usersList.length,
-                            itemBuilder: (context, index) {
-                              return ChatUserCard(
-                                user: search
-                                    ? searchingList[index]
-                                    : usersList[index],
-                              );
-                            },
-                          );
-                        } else {
-                          return Center(child: Text("No User Found"));
+                          //if data is loading
+                          case ConnectionState.waiting:
+                          case ConnectionState.none:
+                            return Center(child: CircularProgressIndicator());
+                          //if some and all data loaded
+                          case ConnectionState.active:
+                          case ConnectionState.done:
+                            return StreamBuilder<
+                                QuerySnapshot<Map<String, dynamic>>>(
+                              stream: Apis.getAllUsers(snapshot.data!.docs
+                                      .map((e) => e.id)
+                                      .toList() ??
+                                  []),
+                              builder: (context, snapshot) {
+                                switch (snapshot.connectionState) {
+                                  //if data is loading
+                                  case ConnectionState.waiting:
+                                  case ConnectionState.none:
+                                    return Center(
+                                        child: CircularProgressIndicator());
+                                  //if some and all data loaded
+                                  case ConnectionState.active:
+                                  case ConnectionState.done:
+                                    final data = snapshot.data!.docs;
+                                    usersList = data
+                                        .map((e) => ChatUser.fromJson(e.data()))
+                                        .toList();
+
+                                    if (usersList.isNotEmpty) {
+                                      return ListView.builder(
+                                        itemCount: search
+                                            ? searchingList.length
+                                            : usersList.length,
+                                        itemBuilder: (context, index) {
+                                          return ChatUserCard(
+                                            user: search
+                                                ? searchingList[index]
+                                                : usersList[index],
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      return Center(
+                                          child: Text("No User Found"));
+                                    }
+                                }
+                              },
+                            );
                         }
-                    }
-                  },
-                ),
-              ),
+                      })),
             ],
           ),
         ),
@@ -195,7 +217,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   //dialog for Add user
-  void _addUserDialog() {
+  void _addChatUserDialog() {
     String email = '';
 
     showDialog(
@@ -247,10 +269,17 @@ class _HomePageState extends State<HomePage> {
 
           //update button
           MaterialButton(
-              onPressed: () {
-                //hide alert dialog
-                // Navigator.pop(context);
-                // APIs.updateMessage(widget.message, updatedMsg);
+              onPressed: () async {
+                if (email.isNotEmpty) {
+                  await Apis.addChatUser(email).then((value) {
+                    Navigator.pop(context);
+                    if (!value) {
+                      Dialogues.errorDialogue(context, "User Not Exist");
+                    }
+                  });
+                } else {
+                  Navigator.pop(context);
+                }
               },
               child: const Text(
                 'Add',

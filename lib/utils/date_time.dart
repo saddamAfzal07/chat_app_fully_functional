@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class MyDateUtil {
   // for getting formatted time from milliSecondsSinceEpochs String
@@ -6,10 +7,17 @@ class MyDateUtil {
     required BuildContext context,
     required String time,
   }) {
+    // Input string contains non-numeric characters
     ///changes the data
-    // final date = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
-    final date = DateTime.fromMicrosecondsSinceEpoch(int.parse(time));
-    return TimeOfDay.fromDateTime(date).format(context);
+
+    print("=========>>>>Print input=>${time}");
+    if (time.isEmpty) {
+      return "";
+    } else {
+      final date = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
+
+      return TimeOfDay.fromDateTime(date).format(context);
+    }
   }
 
   //GET LAST MSG TIME

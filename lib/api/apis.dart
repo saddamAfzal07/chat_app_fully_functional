@@ -57,6 +57,25 @@ class Apis {
         .exists;
   }
 
+  //Add user for chat
+  static Future<bool> addChatUser(String email) async {
+    final data = await firestore
+        .collection("users")
+        .where('email', isEqualTo: email)
+        .get();
+    if (data.docs.isNotEmpty && data.docs.first.id != auth.currentUser!.uid) {
+      firestore
+          .collection('users')
+          .doc(auth.currentUser!.uid)
+          .collection('my_users')
+          .doc(data.docs.first.id)
+          .set({});
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   //for create new user
   static Future<void> createNewUser({
     required String id,
@@ -82,14 +101,56 @@ class Apis {
   }
 
   //Getting all users details
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers() {
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers(
+      List<String> userId) {
+    return firestore
+        .collection('users')
+        .where('id',
+            whereIn: userId.isEmpty
+                ? ['']
+                : userId) //because empty list throws an error
+        // .where('id', isNotEqualTo: user.uid)
+        .snapshots();
+  }
+
+  //get only my users
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getMyUsers() {
+    return firestore
+        .collection("users")
+        .doc(auth.currentUser!.uid)
+        .collection('my_users')
+        .snapshots();
+  }
+
+  // for adding an user to my user when first message is send
+  static Future<void> sendFirstMessage(
+      ChatUser chatUser, String msg, Type type) async {
+    await firestore
+        .collection('users')
+        .doc(chatUser.id)
+        .collection('my_users')
+        .doc(user.uid)
+        .set({}).then((value) => sendMessage(chatUser, msg, type));
+  }
+
+  //Get user information online offline
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfo(
+      ChatUser chatUser) {
     return firestore
         .collection("users")
         .where(
           "id",
-          isNotEqualTo: user.uid,
+          isEqualTo: chatUser.id,
         )
         .snapshots();
+  }
+
+  static Future<void> updateActiveStatus(bool isOnline) async {
+    firestore.collection('users').doc(user.uid).update({
+      'is_online': isOnline,
+      'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
+      'push_token': me.pushToken,
+    });
   }
 
   static late ChatUser me;
@@ -116,13 +177,6 @@ class Apis {
   }
 
   // update online or last active status of user
-  static Future<void> updateActiveStatus(bool isOnline) async {
-    firestore.collection('users').doc(user.uid).update({
-      'is_online': isOnline,
-      'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
-      'push_token': me.pushToken,
-    });
-  }
 
   //update user data
   static Future<void> updateUserProfile() async {
@@ -200,7 +254,7 @@ class Apis {
   static Future<void> sendMessage(
       ChatUser chatUser, String msg, Type type) async {
     print("Enter into send messages");
-    final time = DateTime.now().millisecondsSinceEpoch.toString();
+    final time = await DateTime.now().millisecondsSinceEpoch.toString();
     final Message message = Message(
         formId: user.uid,
         msg: msg,
@@ -211,6 +265,7 @@ class Apis {
     final ref = firestore.collection(
         "chats/${getConversationId(chatUser.id.toString())}/messages/");
     await ref.doc(time).set(message.toJson()).then((value) {
+      print("sendinggggg tiiimmeeeee===>>>>${time}");
       print("Messgage send===>>>>");
       sendPushNotification(chatUser, type == Type.text ? msg : "Image");
     });
